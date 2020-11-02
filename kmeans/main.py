@@ -1,5 +1,7 @@
-from random import randint
 import numpy as np
+from matplotlib import pyplot as plt
+
+from random import randint
 from math import sqrt
 
 ITERATIONS = 10
@@ -38,16 +40,13 @@ if __name__ == '__main__':
 
     # centers = np.array(np.random.choice(data, MEANS, replace=False))    # why does it have to be 1d bruh
 
-    centers = np.random.permutation(data)[:MEANS]    # TODO sketchy + inefficient random.sample
+    centers = np.random.permutation(data)[:MEANS]   # TODO sketchy + inefficient random.sample
 
-    print(data)
-    print(centers)
-    print("\n\n\n")
+    plt.scatter(*data.T, color='blue')              # TODO: "non iterable `data.T` used in an iterating context?"
 
     for it in range(ITERATIONS):
         count = np.zeros(MEANS,      dtype=float)
         sums  = np.zeros((MEANS, 2), dtype=float)
-        # cluster = np.zeros(num_pts)
         for p in data:
             cluster = 0
             # find best cluster
@@ -57,7 +56,8 @@ if __name__ == '__main__':
             # remember in cluster data
             count[cluster] += 1
             sums [cluster] += p
-    sums /= np.tile(count, (2, 1)).T
-    print(sums)
-
+        centers = sums / np.tile(count, (2, 1)).T
+        plt.scatter(*centers.T, color=[1-it/ITERATIONS]*3)
+        print(centers)
+    plt.show()
 
