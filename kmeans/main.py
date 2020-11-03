@@ -6,16 +6,17 @@ import pandas as pd
 from random import randint
 from math import sqrt
 
-ITERATIONS = 10
+ITERATIONS = 2
 MEANS = 5
 
 data = None
 centers = None
 
 def dist(p1, p2):
-    return sqrt(abs(p1[0]-p2[0])**2 + abs(p1[1]-p2[1]))
+    return sqrt(sum([(p1[i]-p2[i])**2 for i in range(len(p1))])) # TODO: use reduce()
 
 if __name__ == '__main__':
+    # # manual input, replaced by pandas
     # try:
     #     MEANS = int(input("How many clusters? "))
     # except:
@@ -30,13 +31,15 @@ if __name__ == '__main__':
     data = raw_data.iloc[:, [3, 4]].values  # annual income, spending score
 
     centers = np.random.permutation(data)[:MEANS]   # TODO sketchy + inefficient random.sample
-
-    # plt.scatter(*data.T, color='blue')              # TODO: "non iterable `data.T` used in an iterating context?"
+    # centers = np.array([[0, 100], [0, 0], [55, 50], [100, 60], [100, 20]])
+    print(centers)
 
     group = np.zeros(len(data), dtype=int)
     for it in range(ITERATIONS):
+        # init center calculation arrays
         count = np.zeros(MEANS,      dtype=float)
         sums  = np.zeros((MEANS, 2), dtype=float)
+        # assign each data point to its nearest centeroid
         for i,p in enumerate(data):
             cluster = 0
             # find best cluster
@@ -47,17 +50,13 @@ if __name__ == '__main__':
             count[cluster] += 1
             sums [cluster] += p
             # store what cluster it was in if this is the last iteration
-            if (it +1 == ITERATIONS):
+            if it+1 == ITERATIONS:
                 group[i] = cluster
         centers = sums / np.tile(count, (2, 1)).T               # update the centers
-        plt.scatter(*centers.T, color=[1-it/ITERATIONS]*3)      # plot iteration on chart
+        plt.scatter(*centers.T, color=[1-(it+1)/(ITERATIONS+1)]*3)      # plot iteration on chart
 
-    colors = cm.rainbow(np.linspace(0, 1, MEANS))[group] # https://stackoverflow.com/a/12236808/10372825
-    # color = [colors[group[k]] for k in range(len(data))]
-    # for k in range(len(data)):
-        # print(group[k], colors[group[k]])
-    print(colors[group])
-    # print(color)
-    plt.scatter(*data.T, color=colors)
+    plt.style.use('dark_background')
+    colors = cm.rainbow(np.linspace(0, 1, MEANS))[group]        # create rainbow https://stackoverflow.com/a/12236808/10372825
+    plt.scatter(*data.T, color=colors)                          # TODO: "non iterable `data.T` used in an iterating context"?
     plt.show()
 
